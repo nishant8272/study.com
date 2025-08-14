@@ -18,10 +18,7 @@ app.use("/contact", contactRouter);
 
 async function startServer() {
   try {
-    await mongoose.connect(process.env.MONGO_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
+    await mongoose.connect(process.env.MONGO_URL);
     console.log("Connected to MongoDB");
     app.listen(3000, () => {
       console.log("Server is running on port 3000");
