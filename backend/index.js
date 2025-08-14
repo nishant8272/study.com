@@ -5,6 +5,7 @@ const cors = require('cors');
 const {userRouter} = require("./user.js");
 const { coursesRoute } = require("./courses.js")
 const {adminRoute } = require("./admin.js");
+const { contactRouter } = require("./contact.js");
 
 const app = express();
 app.use(cors());
@@ -12,6 +13,7 @@ app.use(express.json());
 app.use("/user",userRouter);
 app.use("/courses", coursesRoute);
 app.use("/admin", adminRoute);
+app.use("/contact", contactRouter);
 
 
 async function startServer() {

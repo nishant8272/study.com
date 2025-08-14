@@ -4,6 +4,7 @@ const adminRoute= Router();
 const {adminModel } =require("./db/admin");
 const { userModel } = require("./db/user");
 const { courseModel } = require("./db/courses");
+const { contactModel } = require("./db/contact");
 const { adminAuth } = require("./auth/adminAuth");
 
 //register admin
@@ -283,36 +284,6 @@ adminRoute.get("/list/:courseId", adminAuth, async (req, res) => {
     }
 })
 
-// Debug endpoint to test admin functionality
-adminRoute.get("/debug", async (req, res) => {
-    try {
-        console.log("Debug endpoint hit");
-        const adminCount = await adminModel.countDocuments();
-        const courseCount = await courseModel.countDocuments();
-
-        // Get sample data
-        const sampleAdmins = await adminModel.find().limit(3).select('_id username email');
-        const sampleCourses = await courseModel.find().limit(3).select('_id title creatorId');
-
-        res.json({
-            msg: "Debug info",
-            adminCount: adminCount,
-            courseCount: courseCount,
-            sampleAdmins: sampleAdmins,
-            sampleCourses: sampleCourses,
-            env: {
-                hasJwtSecret: !!process.env.JWT_SECRET_ADMIN,
-                hasMongoUrl: !!process.env.MONGO_URL
-            }
-        });
-    } catch (error) {
-        console.error("Debug endpoint error:", error);
-        res.status(500).json({
-            msg: "Debug error",
-            error: error.message
-        });
-    }
-});
 
 module.exports = {
     adminRoute : adminRoute

@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 async function adminAuth(req, res, next) {
     try {
         console.log("AdminAuth middleware triggered");
-        let token = req.body.token || req.query.token || req.headers["authorization"];
+        let token =req.headers["authorization"] || req.headers["Authorization"];
         console.log("Token received:", token ? "Yes" : "No");
 
         if (!token) {
