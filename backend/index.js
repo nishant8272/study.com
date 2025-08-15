@@ -11,7 +11,7 @@ const { paymentRouter } = require("./razorpay.js");
 const app = express();
 app.use(cors(
   {
-  origin:"https://courseacademy-sepia.vercel.app/", // Allow requests from your frontend
+  origin:"https://courseacademy-sepia.vercel.app", // Allow requests from your frontend
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true 
 }

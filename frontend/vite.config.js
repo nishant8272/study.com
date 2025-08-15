@@ -12,7 +12,10 @@ export default defineConfig({
       '/api': {
         target:"https://study-com-76a1.onrender.com", // Adjust to your backend server URL,
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
+        rewrite: (path) => {
+          console.log('Proxying request:', path);
+          return path.replace(/^\/api/, '')
+        }
       }
     }
   }
