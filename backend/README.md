@@ -1,7 +1,7 @@
 # Course Selling App - Backend API Documentation
 
 ## Overview
-This is the backend API for a course selling application built with Node.js, Express, and MongoDB. The API supports user registration, course management, and admin functionalities.
+This is the backend API for a course selling application built with Node.js, Express, and MongoDB. The API supports user registration, course management, payment processing, and admin functionalities.
 
 ## Base URL
 ```
@@ -246,6 +246,127 @@ Authorization: Bearer <admin-jwt-token>
 
 ---
 
+## Payment Routes (`/api/razorpay`)
+
+### 1. Create Order (Protected)
+**POST** `/api/razorpay/create-order`
+
+Create a Razorpay order for purchasing a course. Requires authentication.
+
+**Headers:**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Request Body:**
+```json
+{
+  "amount": 677.79,
+  "currency": "INR",
+  "receipt": "receipt_688a65e78e09677cf12bd7eb_1755269955316",
+  "courseId": "688a65e78e09677cf12bd7eb",
+  "notes": {
+    "courseTitle": "Java Development",
+    "courseDescription": "Learn Java with hands-on projects."
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "order": {
+    "id": "order_R5eSrJNWBgZNH2",
+    "entity": "order",
+    "amount": 67779,
+    "currency": "INR",
+    "receipt": "receipt_688a65e78e09677cf12bd7eb_1755269955316",
+    "status": "created",
+    "notes": {}
+  },
+  "payment": {
+    "status": "pending"
+  },
+  "course": {
+    "_id": "688a65e78e09677cf12bd7eb",
+    "title": "Java Development",
+    "description": "Learn Java with hands-on projects.",
+    "price": 677.79
+  }
+}
+```
+
+---
+
+### 2. Verify Payment (Protected)
+**POST** `/api/razorpay/verify-payment`
+
+Verify the payment after a successful transaction. Requires authentication.
+
+**Headers:**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Request Body:**
+```json
+{
+  "razorpay_order_id": "order_R5eSrJNWBgZNH2",
+  "razorpay_payment_id": "pay_R5eT0PZaukpEqf",
+  "razorpay_signature": "1d5c1e43d20441ec6067688c91069365af8f97071cd73279b289cd9775b37a6c"
+}
+```
+
+**Response (Success):**
+```json
+{
+  "msg": "Payment verified successfully",
+  "status": "ok",
+  "course": {
+    "_id": "688a65e78e09677cf12bd7eb",
+    "title": "Java Development",
+    "description": "Learn Java with hands-on projects.",
+    "price": 677.79
+  }
+}
+```
+
+**Response (Failure):**
+```json
+{
+  "msg": "Payment verification failed",
+  "status": "failed"
+}
+```
+
+---
+
+### 3. Get Payment Status (Protected)
+**GET** `/api/razorpay/payment-status/:courseId`
+
+Get the payment status for a specific course. Requires authentication.
+
+**Headers:**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Response:**
+```json
+{
+  "msg": "Payment status retrieved successfully",
+  "status": "completed",
+  "course": {
+    "_id": "688a65e78e09677cf12bd7eb",
+    "title": "Java Development",
+    "description": "Learn Java with hands-on projects.",
+    "price": 677.79
+  }
+}
+```
+
+---
+
 ## Admin Routes (`/admin`)
 
 ### 1. Admin Registration
@@ -430,6 +551,8 @@ Create a `.env` file in the backend directory:
 MONGO_URL=mongodb://localhost:27017/course_selling_app
 JWT_SECRET_USER=your_user_jwt_secret
 JWT_SECRET_ADMIN=your_admin_jwt_secret
+Razorpay_KEY_ID=your_razorpay_key_id
+Razorpay_KEY_SECRET=your_razorpay_key_secret
 ```
 
 ---
@@ -474,4 +597,4 @@ The server will run on `http://localhost:3000`
 - `email` (String)
 - `password` (String)
 - `firstName` (String)
-- `lastName` (String) 
+- `lastName` (String)
