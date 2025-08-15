@@ -34,7 +34,6 @@ adminRoute.post("/register", async (req, res) => {
         });
 
         await admin.save();
-        console.log("Admin created:", admin._id);
 
         const token = jwt.sign({ username, email }, process.env.JWT_SECRET_ADMIN, { expiresIn: '24h' });
         return res.json({
@@ -98,12 +97,10 @@ adminRoute.post("/login", async (req, res) => {
 //get all courses post by admin
 adminRoute.get("/course",adminAuth,async(req,res)=>{
     try {
-        console.log("Admin course endpoint hit");
-        console.log("req.email:", req.email);
+        // First try to get courses by this admin
 
         const admin = await adminModel.findOne({email:req.email});
-        console.log("Admin found:", admin ? "Yes" : "No");
-
+       
         if (!admin) {
             console.log("Admin not found for email:", req.email);
             return res.status(404).json({
@@ -111,17 +108,13 @@ adminRoute.get("/course",adminAuth,async(req,res)=>{
             });
         }
 
-        console.log("Admin ID:", admin._id);
-
         // First try to get courses by this admin
         let courses = await courseModel.find({ creatorId: admin._id });
-        console.log("Courses found by creatorId:", courses.length);
-
+       
         // If no courses found by creatorId, check if courses exist without creatorId
         if (courses.length === 0) {
-            console.log("No courses found by creatorId, checking all courses...");
+           
             const allCourses = await courseModel.find({});
-            console.log("Total courses in DB:", allCourses.length);
 
             // For existing courses without creatorId, assign them to this admin
             const coursesWithoutCreator = await courseModel.find({
@@ -132,7 +125,6 @@ adminRoute.get("/course",adminAuth,async(req,res)=>{
             });
 
             if (coursesWithoutCreator.length > 0) {
-                console.log("Found courses without creatorId:", coursesWithoutCreator.length);
                 // Update these courses to have this admin as creator
                 await courseModel.updateMany(
                     {
@@ -146,7 +138,6 @@ adminRoute.get("/course",adminAuth,async(req,res)=>{
 
                 // Re-fetch the courses
                 courses = await courseModel.find({ creatorId: admin._id });
-                console.log("Courses after update:", courses.length);
             }
         }
 

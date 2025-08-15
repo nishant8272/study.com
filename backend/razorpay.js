@@ -19,14 +19,11 @@ console.log('Razorpay instance ready:', !!razorpay);
 
 razorRouter.post('/create-order', userAuth, async (req, res) => {
   try {
-    console.log('=== Starting order creation ===');
-    console.log('Request body:', req.body);
-    
+
     const { amount, currency, receipt, courseId, notes } = req.body;
     console.log('Extracted data:', { amount, currency, receipt, courseId, notes });
     
     // Get user by email from auth middleware
-    console.log('Looking for user with email:', req.email);
     const user = await userModel.findOne({ email: req.email });
     if (!user) {
       console.log('User not found for email:', req.email);
@@ -34,25 +31,20 @@ razorRouter.post('/create-order', userAuth, async (req, res) => {
         error: 'User not found'
       });
     }
-    console.log('User found:', { userId: user._id, email: user.email });
     
     const userId = user._id; // Get user ID from found user
 
     // Validate course exists
-    console.log('Looking for course with ID:', courseId);
     const course = await courseModel.findById(courseId);
     if (!course) {
-      console.log('Course not found for ID:', courseId);
       return res.status(404).json({
         error: 'Course not found'
       });
     }
-    console.log('Course found:', { courseId: course._id, title: course.title, price: course.price });
 
     // Check if user already purchased this course
     const alreadyPurchased = user.purchasedCourses.some(element => element.courseId.toString() === courseId);
     if (alreadyPurchased) {
-      console.log('User already owns this course');
       return res.status(400).json({
         error: 'You already own this course'
       });
@@ -64,20 +56,14 @@ function safeReceipt(receipt) {
 }
 
 
-    console.log('Creating Razorpay order options...');
     const options = {
       amount: amount * 100, // Convert amount to paise
       currency: currency || 'INR',
       receipt: safeReceipt(receipt) || `receipt_${Date.now()}`,
       notes: {}
     };
-    console.log('Razorpay options:', options);
-
-    console.log('Calling Razorpay API to create order...');
     const order = await razorpay.orders.create(options);
-    console.log('Razorpay order created successfully:', { orderId: order.id, amount: order.amount });
     
-    console.log('Creating payment record in database...');
     // Create payment record in database
     const payment = await Payment.create({
       amount: amount,
@@ -91,9 +77,7 @@ function safeReceipt(receipt) {
       razorpay_order_id: order.id,
       notes: JSON.stringify(notes) // Convert notes object to string
     });
-    console.log('Payment record created:', { paymentId: payment._id, orderId: payment.payment_id });
-
-    console.log('Sending success response...');
+ 
     res.json({
       order: order,
       payment: payment,
@@ -118,7 +102,7 @@ razorRouter.post('/verify-payment',userAuth, async (req, res) => {
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
   
   const secret = razorpay.key_secret;
-  console.log("secret:" + secret);
+ 
 
    // Use Razorpay key secret from environment variable
   const body = razorpay_order_id + '|' + razorpay_payment_id;
