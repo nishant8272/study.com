@@ -1,8 +1,12 @@
 {
- "rewrites": [
- {
- "source": "/(.*)",
- "destination": "/index.html"
- }
- ]
- }
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://study-com-76a1.onrender.com/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
