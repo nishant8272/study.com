@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken")
 const { userModel } = require("./db/user");
 const { courseModel } = require("./db/courses");
 const { userAuth } = require("./auth/userAuth");
+const { Payment } = require("./db/payment");
 
 const userRouter = Router();
 
@@ -100,44 +101,38 @@ userRouter.get("/course/:id", userAuth, async (req, res) => {
     });
 });
 
+// Check if user owns a specific course
+userRouter.get("/owns-course/:id", userAuth, async (req, res) => {
+    try {
+        const courseId = req.params.id;
+        if (!courseId) {
+            return res.status(400).json({
+                "msg": "course ID is required"
+            });
+        }
 
-userRouter.post("/purchase/:id", userAuth, async (req, res) => {
-    const courseId = req.params.id;
-    if (!courseId) {
+        const user = await userModel.findOne({ email: req.email });
+        if (!user) {
+            return res.status(404).json({
+                "msg": "user not found"
+            });
+        }
+
+        const ownsCourse = user.purchasedCourses.some(element => element.courseId.toString() === courseId);
+        
         return res.json({
-            "msg": "course ID is required"
+            "msg": "course ownership status",
+            "ownsCourse": ownsCourse,
+            "courseId": courseId
+        });
+    } catch (error) {
+        console.error("Check ownership error:", error);
+        return res.status(500).json({
+            "msg": "internal server error"
         });
     }
-    const course = await courseModel.findById(courseId);
-    if (!course) {
-        return res.json({
-            "msg": "course not found"
-        });
-    }
-    const user = await userModel.findOne(
-        { email: req.email }
-    );
+});
 
-    // Check if user already owns this course
-    const alreadyPurchased = user.purchasedCourses.some(element => element.courseId.toString() === courseId);
-    if (alreadyPurchased) {
-        return res.json({
-            msg: "You cannot buy the same course twice. You already own this course."
-        });
-    }
-
-    const userupdate = await userModel.findOneAndUpdate(
-        { email: req.email },
-        { $push: { purchasedCourses: { courseId: course._id } } },
-        { new: true }
-    );
-    
-    return res.json({
-        "msg": "course purchased successfully",
-        "purchasedCourse": course
-    });
-}
-);
 
 userRouter.get("/purchasedCourses", userAuth, async (req, res) => {
     const user = await userModel.findOne({ email: req.email })

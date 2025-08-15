@@ -6,14 +6,17 @@ const {userRouter} = require("./user.js");
 const { coursesRoute } = require("./courses.js")
 const {adminRoute } = require("./admin.js");
 const { contactRouter } = require("./contact.js");
+const { paymentRouter } = require("./razorpay.js");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({extended:true}));
 app.use("/user",userRouter);
 app.use("/courses", coursesRoute);
 app.use("/admin", adminRoute);
 app.use("/contact", contactRouter);
+app.use("/razorpay", paymentRouter);
 
 
 async function startServer() {
