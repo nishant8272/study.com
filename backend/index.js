@@ -7,12 +7,12 @@ const { coursesRoute } = require("./courses.js")
 const {adminRoute } = require("./admin.js");
 const { contactRouter } = require("./contact.js");
 const { paymentRouter } = require("./razorpay.js");
-const job =require("./db/cron.js")
+const {job} =require("./db/cron.js")
 
 const app = express();
 
 if(process.env.NODE_ENV==="production") job.start()
-  
+
 app.use(cors(
   {
   origin:"https://courseacademy-sepia.vercel.app", // Allow requests from your frontend
